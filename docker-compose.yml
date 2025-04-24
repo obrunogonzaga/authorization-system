@@ -1,0 +1,40 @@
+services:
+  # Serviço do autorizer
+  authorizer:
+    build: .
+    image: iso8583-authorizer:latest
+    container_name: iso8583-authorizer
+    ports:
+      - "9000:9000"
+    depends_on:
+      - rabbitmq
+      - postgres
+    environment:
+      # Ajuste as variáveis conforme necessário
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - POSTGRES_URL=postgres://user:password@postgres:5432/authorizer?sslmode=disable
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: iso8583-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
+  postgres:
+    image: postgres:15
+    container_name: iso8583-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=authorizer
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
